@@ -50,7 +50,7 @@ impl SocketReader {
             };
 
             let mut senders = self.senders.lock().await;
-            for (rule, sender) in &*senders {
+            for (rule, sender) in &mut *senders {
                 if let Ok(msg) = &msg {
                     if let Some(rule) = rule.as_ref() {
                         match rule.matches(msg) {
@@ -65,6 +65,7 @@ impl SocketReader {
                     }
                 }
 
+                sender.set_await_active(true);
                 if let Err(e) = sender.broadcast_direct(msg.clone()).await {
                     // An error would be due to either of these:
                     //
